@@ -28,7 +28,7 @@ class URAScraper(Scraper):
         return self._as_of_date
 
     def parse_date(self, date_txt):
-        date_strs = re.findall('\d{2}/\d{2}/\d{2}', date_txt)
+        date_strs = re.findall('\d{2}/\d{2}/\d{4}', date_txt)
         if date_strs:
             date_str = date_strs[0]
             return datetime.datetime.strptime(date_str, self.date_fmt).date()
