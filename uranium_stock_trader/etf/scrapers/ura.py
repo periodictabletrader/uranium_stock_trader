@@ -15,7 +15,7 @@ class URAScraper(Scraper):
     def __init__(self):
         url = 'https://www.globalxetfs.com/funds/ura/?download_full_holdings=true'
         date_selector = '#fund > section > div.container-fluid > div.row.header > div.col-sm-7 > h3 > small'
-        date_fmt = '%m/%d/%y'
+        date_fmt = '%m/%d/%Y'
         super().__init__(url, date_selector, date_fmt)
         self.resp = requests.get(url)
 
