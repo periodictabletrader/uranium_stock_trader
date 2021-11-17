@@ -40,5 +40,5 @@ def get_ticker_holding(tickers, start_date=None, end_date=None, etfs=None):
     tickers = wrap_list(tickers)
     etfs = wrap_list(etfs)
     query = construct_query(tickers, start_date, end_date, etfs)
-    df = pd.read_sql_query(query, connection())
+    df = pd.read_sql_query(query, connection(), parse_dates={'hdate': '%Y-%m-%d'})
     return df
