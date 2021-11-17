@@ -10,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from uranium_stock_trader.constants import CHROME_DRIVER_PATH, DEFAULT_DOWNLOAD_PATH
 from .base import Scraper
+# from uranium_stock_trader.etf.model import engine
+# from uranium_stock_trader.etf.ref_data import TICKER_MAP
 from ..model import engine
 from ..ref_data import TICKER_MAP
 
@@ -68,17 +70,24 @@ class URNMScraper(Scraper):
         date_str = datetime.date.today().strftime('%m-%d-%Y')
         file_name = f'{DEFAULT_DOWNLOAD_PATH}/urnm-holdings-{date_str}.csv'
         raw_df = pd.read_csv(file_name)
-        etf_holdings_df = self.parse_scraped_df(raw_df)
+        etf_holdings_df = self.parse_scraped_df(raw_df, self.as_of_date)
         etf_holdings_df.to_sql('etf_holdings', con=engine, if_exists='append', index=False)
         return etf_holdings_df
 
-    def parse_scraped_df(self, holdings_df, as_of_date=None):
-        as_of_date = as_of_date or self.as_of_date
+    @staticmethod
+    def parse_percentage(pct_str):
+        pct_str = pct_str.replace('%', '')
+        pct = float(pct_str) / 100
+        return pct
+
+    @staticmethod
+    def parse_scraped_df(holdings_df, as_of_date):
+        as_of_date = as_of_date
         holdings_df['hdate'] = as_of_date
         holdings_df['fund'] = 'URNM'
         holdings_df['ticker'] = holdings_df['TICKER'].apply(lambda tikr: TICKER_MAP.get(tikr) or 'N/A')
         holdings_df['name'] = holdings_df['COMPANY NAME']
         holdings_df['shares'] = holdings_df['SHARES']
         holdings_df['mv'] = holdings_df['MARKET VALUE']
-        holdings_df['pct_of_nav'] = holdings_df['% OF NET ASSET VALUES']
+        holdings_df['pct_of_nav'] = holdings_df['% OF NET ASSET VALUES'].apply(URNMScraper.parse_percentage)
         return holdings_df[['hdate', 'fund', 'ticker', 'name', 'shares', 'mv', 'pct_of_nav', ]]

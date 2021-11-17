@@ -44,7 +44,7 @@ class URAScraper(Scraper):
         holdings_df['name'] = holdings_df['Name']
         holdings_df['shares'] = holdings_df['Shares Held']
         holdings_df['mv'] = holdings_df['Market Value ($)']
-        holdings_df['pct_of_nav'] = holdings_df['% of Net Assets']
+        holdings_df['pct_of_nav'] = holdings_df['% of Net Assets'] / 100
         etf_holdings_df = holdings_df[['hdate', 'fund', 'ticker', 'name', 'shares', 'mv', 'pct_of_nav', ]]
         etf_holdings_df.to_sql('etf_holdings', con=engine, if_exists='append', index=False)
         return etf_holdings_df
