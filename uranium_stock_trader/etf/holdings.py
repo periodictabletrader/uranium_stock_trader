@@ -6,7 +6,7 @@ from ..constants import DB_NAME
 from ..utils import wrap_list
 
 
-@lru_cache
+@lru_cache()
 def connection():
     return sqlite3.connect(DB_NAME)
 
