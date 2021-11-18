@@ -72,10 +72,10 @@ def shares_traded_in_etf_vs_mkt(ticker, start_date=None, end_date=None, etfs=Non
     ticker_hist = ticker_hist.rename(columns={'Close': 'Price'})
     ticker_hist['3MAvgVol'] = ticker_hist['Volume'].rolling(window=90).mean()
     ticker_overall = pd.merge(ticker_hist, ticker_holding, left_index=True, right_on='hdate')
-    ticker_overall['pct_of_3M_vol'] = ticker_overall['Shares_held_change'] / ticker_overall['3MAvgVol']
-    ticker_overall['pct_of_3M_vol_abs'] = ticker_overall['Shares_held_change_abs'] / ticker_overall['3MAvgVol']
+    ticker_overall['pct_of_3M_vol'] = ticker_overall['Shares_held_change_abs'] / ticker_overall['3MAvgVol']
+    ticker_overall['pct_of_Volume'] = ticker_overall['Shares_held_change_abs'] / ticker_overall['Volume']
     ticker_overall = ticker_overall[['hdate', 'fund', 'ticker', 'Price', 'Price_change', 'Price_change_pct', 'mv',
                                      'Shares_held', 'Shares_held_change', 'Shares_held_change_abs',
-                                     'Shares_held_change_pct', 'Volume', '3MAvgVol', 'pct_of_3M_vol',
-                                     'pct_of_3M_vol_abs', 'pct_of_nav']]
+                                     'Shares_held_change_pct', 'Volume', 'pct_of_Volume', '3MAvgVol', 'pct_of_3M_vol',
+                                     'pct_of_nav']]
     return ticker_overall
