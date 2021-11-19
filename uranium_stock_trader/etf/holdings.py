@@ -1,9 +1,13 @@
 import datetime
-
-import pandas as pd
-import yfinance as yf
 import sqlite3
 from functools import lru_cache
+
+import matplotlib.ticker as mticker
+import pandas as pd
+import seaborn as sns
+import yfinance as yf
+from matplotlib import pyplot as plt
+
 from ..constants import DB_NAME
 from ..utils import wrap_list
 
@@ -79,3 +83,29 @@ def shares_traded_in_etf_vs_mkt(ticker, start_date=None, end_date=None, etfs=Non
                                      'Shares_held_change_pct', 'Volume', 'pct_of_Volume', '3MAvgVol', 'pct_of_3M_vol',
                                      'pct_of_nav']]
     return ticker_overall
+
+
+def plot_etf_activity_vs_mkt_volume(ticker, start_date=None, end_date=None, etfs=None):
+    etfs = wrap_list(etfs)
+    analysis = shares_traded_in_etf_vs_mkt(ticker, start_date, end_date, etfs)
+    melted_df = pd.melt(analysis, id_vars=['hdate', 'ticker'], value_vars=['Shares_held_change_abs', 'Volume'])
+    combined_df = pd.merge(melted_df, analysis, left_on='hdate', right_on='hdate')
+    combined_df['Date'] = combined_df['hdate'].apply(lambda dt: pd.Timestamp(dt).to_pydatetime().strftime('%Y-%m-%d'))
+
+    etfs_str = f'{", ".join(etfs)}' if etfs else 'ETF'
+    fig, ax1 = plt.subplots(figsize=(20, 12))
+    fig.autofmt_xdate()
+    ax1.set_title(f'{ticker} - {etfs_str} activity vs Price', fontsize=16)
+    ax1.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: format(int(x), ',')))
+    ax1 = sns.barplot(x='Date', y='value', data=combined_df, hue='variable')
+    ax1.set_xlabel('Date')
+    ax1.set_ylabel('# Shares')
+    plt.xticks(rotation=90)
+    plt.legend(title='')
+
+    ax2 = ax1.twinx()
+    color = 'tab:red'
+    ax2.set_ylabel('Price', fontsize=16, color=color)
+    ax2 = sns.lineplot(x='Date', y='Price', data=combined_df, sort=False, color=color)
+    ax2.tick_params(axis='y', color=color)
+    plt.show()
